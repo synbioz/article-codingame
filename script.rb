@@ -62,30 +62,44 @@ class Dictionnary
 end
 
 class Problem
+  attr_reader :stats
+
   def initialize(dict, sequence)
     @dict     = dict
     @sequence = sequence
     @_memory  = {}
+    @stats    = {calls: 0, nodes: 0, cuts: 0, match: 0, unmatch: 0}
   end
 
   def solve
-    solve_subsequence(0)
+    @_solve ||= solve_subsequence(0)
   end
 
   protected
 
     def solve_subsequence(from)
+      @stats[:calls] += 1
       return 1 if from == @sequence.size
 
       # Memoize the calls to solve_subsequence
-      return @_memory[from] if @_memory.has_key?(from)
+
+      if @_memory.has_key?(from)
+        @stats[:cuts] += 1
+        return @_memory[from]
+      end
+
+      @stats[:nodes] += 1
+
 
       possibilities = 0
       for size in (@dict.min_size..@dict.max_size)
         morse = @sequence[from, size]
         count = @dict.count(morse)
         if count > 0
+          @stats[:match] += 1
           possibilities += count * solve_subsequence(from + size)
+        else
+          @stats[:unmatch] += 1
         end
       end
 
@@ -105,3 +119,4 @@ solution = problem.solve
 
 # Print the solution
 puts solution
+STDERR.puts problem.stats
