@@ -27,75 +27,22 @@ $ascii_morse_mapping = {
   'Z' => '--..'
 }
 
-class Word
-  attr_reader :morse
-
-  def initialize(ascii_text)
-    @morse = ''
-    ascii_text.each_char{ |char| @morse << $ascii_morse_mapping.fetch(char) }
-  end
+$sequence = gets.chomp
+$dico = (1..gets.to_i).map do
+  result = ''
+  gets.chomp.each_char{ |char| result << $ascii_morse_mapping.fetch(char) }
+  result
 end
 
-class Dictionnary
-  def initialize
-    @_hash = {}
-  end
+def possibilities(seq)
+  return 1 if seq.size == 0
 
-  def push(word)
-    @_max_size = nil
-    morse = word.morse
-    @_hash[morse] = count(morse) + 1
-  end
-
-  def count(morse)
-    @_hash[morse] || 0
-  end
-
-  def max_size
-    @_max_size ||= @_hash.keys.max_by(&:size).size
-  end
-end
-
-class Problem
-  def initialize(dict, sequence)
-    @dict     = dict
-    @sequence = sequence
-    @_memory  = {}
-  end
-
-  def solve
-    solve_subsequence(0)
-  end
-
-  protected
-
-    def solve_subsequence(from)
-      return 1 if from == @sequence.size
-
-      # Memoize the calls to solve_subsequence
-      return @_memory[from] if @_memory.has_key?(from)
-
-      possibilities = 0
-      for size in (1..@dict.max_size)
-        morse = @sequence[from, size]
-        count = @dict.count(morse)
-        if count > 0
-          possibilities += count * solve_subsequence(from + size)
-        end
-      end
-
-      @_memory[from] = possibilities
+  $dico.reduce(0) do |total, word|
+    if word == seq[0, word.size]
+      total += possibilities(seq[word.size, seq.size - word.size])
     end
+    total
+  end
 end
 
-sequence = gets.chomp
-dict     = Dictionnary.new
-
-# Fill the dictionnary
-gets.to_i.times { dict.push Word.new(gets.chomp) }
-
-# Solve the problem
-problem = Problem.new(dict, sequence)
-result  = problem.solve
-
-puts result
+puts possibilities($sequence)
