@@ -69,28 +69,27 @@ class Problem
   end
 
   def solve
-    solve_subsequence(@sequence)
+    solve_subsequence(0)
   end
 
   protected
 
-    def solve_subsequence(seq)
-      return 1 if seq.size == 0
+    def solve_subsequence(from)
+      return 1 if from == @sequence.size
 
       # Memoize the calls to solve_subsequence
-      return @_memory[seq] if @_memory.has_key?(seq)
+      return @_memory[from] if @_memory.has_key?(from)
 
       possibilities = 0
-      min = @dict.min_size
-      max = [@dict.max_size, seq.size].min
-      for size in (min..max)
-        count = @dict.count(seq[0, size])
+      for size in (@dict.min_size..@dict.max_size)
+        morse = @sequence[from, size]
+        count = @dict.count(morse)
         if count > 0
-          possibilities += count * solve_subsequence(seq[size, seq.size - size])
+          possibilities += count * solve_subsequence(from + size)
         end
       end
 
-      @_memory[seq] = possibilities
+      @_memory[from] = possibilities
     end
 end
 
