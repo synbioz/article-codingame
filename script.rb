@@ -34,15 +34,19 @@ $dico = (1..gets.to_i).map do
   result
 end
 
+$possibilities_memory = {}
 def possibilities(seq)
   return 1 if seq.size == 0
+  return $possibilities_memory[seq] if $possibilities_memory.has_key?(seq)
 
-  $dico.reduce(0) do |total, word|
+  result = $dico.reduce(0) do |total, word|
     if word == seq[0, word.size]
       total += possibilities(seq[word.size, seq.size - word.size])
     end
     total
   end
+
+  $possibilities_memory[seq] = result
 end
 
 puts possibilities($sequence)
